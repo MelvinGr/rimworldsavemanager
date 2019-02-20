@@ -9,7 +9,7 @@ At the moment it supports editing the follwing stats:
 **Plants**: Full grow all plants
 Supports races made with the Humanoid Alien Framework.  
 
-**Mods that are added by the Steam Workshop are not supported. Only the mods in the "Mod"-folder will be searched for Traits, Backstories and Races.**  
+**~~Mods that are added by the Steam Workshop are not supported. Only the mods in the "Mod"-folder will be searched for Traits, Backstories and Races.~~ -Only supported on Windows**
 
 Copy the executable file (.exe) into your game directory and run it.  
 

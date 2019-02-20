@@ -8,10 +8,12 @@ using System.Collections;
 using System.IO;
 using System.Globalization;
 using RimWorldSaveManager.Data.DataStructure;
-using System.Text;
 using RimWorldSaveManager.UserControls;
 using RimWorldSaveManager.Data.DataStructure.Defs;
 using RimWorldSaveManager.Data.DataStructure.SaveThings;
+#if !__MonoCS__
+using Microsoft.Win32;
+#endif
 
 namespace RimWorldSaveManager
 {
@@ -98,11 +100,18 @@ namespace RimWorldSaveManager
 
             var allXmlFiles = Directory.GetFiles("Mods", "*.xml", SearchOption.AllDirectories);
 
-            List<Hair> allHairs = new List<Hair>();
+            var steamModsDir = GetSteamWorkshopLocation();
+            if (Directory.Exists(steamModsDir))
+                allXmlFiles = allXmlFiles.Concat(Directory.GetFiles(steamModsDir, "*.xml", SearchOption.AllDirectories)).ToArray();
 
+            List<Hair> allHairs = new List<Hair>();
             foreach (var xmlFile in allXmlFiles)
             {
-                string[] pathComponents = xmlFile.Split('\\');
+                var modxmlFile = xmlFile;
+                if (modxmlFile.StartsWith(steamModsDir))
+                    modxmlFile = xmlFile.Replace(steamModsDir, "");
+
+                string[] pathComponents = modxmlFile.Split('\\');
                 if (!pathComponents[2].Equals("Defs"))
                 {
                     continue;
@@ -557,6 +566,34 @@ namespace RimWorldSaveManager
             return (T)node.XPathEvaluate(eval);
         }
 
+        private static string GetSteamWorkshopLocation()
+        {
+#if !__MonoCS__
+            var steamLocation = "";
 
+            try
+            {
+                steamLocation = Registry.LocalMachine.OpenSubKey("Software\\Valve\\Steam")
+                    ?.GetValue("InstallPath") as string;
+            }
+            catch
+            {
+                try
+                {
+                    steamLocation = Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Valve\\Steam")
+                        ?.GetValue("InstallPath") as string;
+                }
+                catch
+                {
+                }
+            }
+
+            steamLocation += @"\steamapps\workshop\content\294100";
+            if (Directory.Exists(steamLocation))
+                return steamLocation;
+            else
+#endif
+                return "";
+        }
     }
 }
